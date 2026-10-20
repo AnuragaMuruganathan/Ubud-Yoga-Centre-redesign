@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ubud Yoga Centre UI/UX Audit</title>
+<meta name="description" content="Full UI and UX audit of the Ubud Yoga Centre Next.js site: layout, fit-to-screen, spacing, alignment, imagery, accessibility and deployment size.">
+<style>
+:root {
+  --bg: #fbf8f1; --surface: #ffffff; --surface-2: #f2eee4; --ink: #17261f; --muted: #5a6a61;
+  --line: #e2dccd; --brand: #193b30; --accent: #b03a25;
+  --crit: #b3261e; --crit-bg: #fde8e6; --high: #a85b00; --high-bg: #fdf0dc;
+  --med: #2d5f8a; --med-bg: #e4eef7; --low: #4f5b55; --low-bg: #eceee9; --ok: #2e6b3f; --ok-bg: #e3f1e6;
+  --radius: 10px; color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101814; --surface: #17211c; --surface-2: #1e2a24; --ink: #e9ede6; --muted: #a3b0a8;
+    --line: #2c3a33; --brand: #9fd1b8; --accent: #f08f7a;
+    --crit: #ff8a80; --crit-bg: #3a1714; --high: #ffb95c; --high-bg: #35260f; --med: #8cc3f0; --med-bg: #142a3b;
+    --low: #b9c4be; --low-bg: #232c28; --ok: #8fd6a3; --ok-bg: #15301e; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101814; --surface: #17211c; --surface-2: #1e2a24; --ink: #e9ede6; --muted: #a3b0a8;
+  --line: #2c3a33; --brand: #9fd1b8; --accent: #f08f7a;
+  --crit: #ff8a80; --crit-bg: #3a1714; --high: #ffb95c; --high-bg: #35260f; --med: #8cc3f0; --med-bg: #142a3b;
+  --low: #b9c4be; --low-bg: #232c28; --ok: #8fd6a3; --ok-bg: #15301e; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+code { font: 0.86em/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; background: var(--surface-2); padding: 0.1em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+header.top { background: var(--brand); color: #fbf8f1; padding: 48px 0 40px; }
+:root[data-theme="dark"] header.top { color: #101814; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) header.top { color: #101814; } }
+header.top h1 { font: 400 clamp(2rem, 5vw, 3.2rem)/1.1 Georgia, "Times New Roman", serif; margin: 0 0 12px; letter-spacing: -0.01em; }
+header.top p { margin: 0; max-width: 62ch; opacity: 0.9; }
+.meta { margin-top: 18px; font-size: 0.875rem; opacity: 0.8; }
+.summary { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: -24px 0 32px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.stat b { display: block; font-size: 1.9rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.875rem; color: var(--muted); }
+.stat.crit b { color: var(--crit); } .stat.high b { color: var(--high); } .stat.med b { color: var(--med); } .stat.low b { color: var(--low); }
+nav.toc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 32px; }
+nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+nav.toc li { margin: 2px 0; break-inside: avoid; }
+h2 { font: 400 clamp(1.6rem, 3.4vw, 2.2rem)/1.15 Georgia, "Times New Roman", serif; margin: 48px 0 8px; scroll-margin-top: 16px; }
+h2 + p.lead { color: var(--muted); margin: 0 0 20px; max-width: 70ch; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.filters button { font: inherit; font-size: 0.875rem; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filters button:focus-visible, .theme:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+article.f { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--sev); border-radius: var(--radius); padding: 18px 20px; margin: 0 0 14px; }
+article.f[data-sev="crit"] { --sev: var(--crit); } article.f[data-sev="high"] { --sev: var(--high); }
+article.f[data-sev="med"] { --sev: var(--med); } article.f[data-sev="low"] { --sev: var(--low); }
+article.f h3 { margin: 0 0 6px; font-size: 1.08rem; line-height: 1.35; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.id { font: 600 0.75rem/1 ui-monospace, Consolas, monospace; color: var(--muted); }
+.chip { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.crit { color: var(--crit); background: var(--crit-bg); } .chip.high { color: var(--high); background: var(--high-bg); }
+.chip.med { color: var(--med); background: var(--med-bg); } .chip.low { color: var(--low); background: var(--low-bg); }
+.chip.ok { color: var(--ok); background: var(--ok-bg); }
+.where { font-size: 0.875rem; color: var(--muted); margin: 0 0 8px; }
+article.f p { margin: 6px 0; }
+article.f ul { margin: 6px 0; padding-left: 20px; }
+.fix { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.94rem; }
+.fix b { color: var(--ok); }
+figure { margin: 12px 0 4px; }
+figure img { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); }
+figure.phone img { max-width: 260px; }
+figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 640px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--surface-2); font-weight: 600; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.over { color: var(--crit); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.note { font-size: 0.875rem; color: var(--muted); }
+.theme { position: absolute; top: 16px; right: 16px; font: inherit; font-size: 0.8rem; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(251,248,241,0.4); background: transparent; color: inherit; cursor: pointer; }
+header.top { position: relative; }
+footer.end { margin: 56px 0 40px; color: var(--muted); font-size: 0.875rem; }
+.hidden { display: none !important; }
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  nav.toc ol { columns: 1; }
+  article.f { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="theme" type="button" id="theme">Toggle theme</button>
+  <div class="wrap">
+    <h1>Ubud Yoga Centre: UI/UX audit</h1>
+    <p>A full review of the Next.js redesign: layout, fit to the screen, alignment, spacing, imagery, congestion, accessibility and deployment weight. Every finding includes the affected page, the source file and a fix.</p>
+    <p class="meta">20 October 2026 · Tested in Chromium with agent-browser at 1440×900 (desktop), 1366×768 (small laptop) and 390×844 (mobile) · 17 routes · rules from Vercel Web Interface Guidelines and the ui-ux-pro-max checklist</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="summary" aria-label="Findings by severity">
+    <div class="stat crit"><b>6</b><span>Critical</span></div>
+    <div class="stat high"><b>10</b><span>High</span></div>
+    <div class="stat med"><b>10</b><span>Medium</span></div>
+    <div class="stat low"><b>8</b><span>Low / code</span></div>
+  </div>
+
+  <section aria-labelledby="status" style="background:var(--ok-bg);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px">
+    <h2 id="status" style="margin:0 0 6px;font-size:1.4rem">Fix status <span class="chip ok">Updated 20 Oct 2026</span></h2>
+    <p style="margin:0 0 8px"><strong>All 34 findings have been addressed in code.</strong> A production build passes, and first-load JS dropped from 201–213 kB to 157–175 kB after removing GSAP and Lenis. Four items need input from the studio:</p>
+    <ul style="margin:0;padding-left:20px">
+      <li><strong>Higher-resolution photos (H1):</strong> low-res files were moved out of full-width slots, but heroes still need 2400px+ originals.</li>
+      <li><strong>Home and Beginner's Guide heroes (H4):</strong> confirm the home hero is a real photo of the studio, and supply a real first-visit photo.</li>
+      <li><strong>Canggu timetable:</strong> it's now HTML, but the only source was the August 2026 poster, so it's labelled “confirm current times”.</li>
+      <li><strong>Café tags:</strong> the studio's menu marks the Protein Bowl as vegan, but it's served with tzatziki. Please check that tag.</li>
+    </ul>
+  </section>
+
+  <nav class="toc" aria-label="Contents">
+    <ol>
+      <li><a href="#verdict">Verdict</a></li>
+      <li><a href="#findings">All findings</a></li>
+      <li><a href="#fit">Fit-to-screen measurements</a></li>
+      <li><a href="#images">Image inventory</a></li>
+      <li><a href="#optimise">Vercel size optimisation (done)</a></li>
+      <li><a href="#order">Suggested fix order</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="verdict">Verdict</h2>
+  <p class="lead">The design system holds together: one typeface, a consistent palette, good spacing tokens and sensible reduced-motion handling. Most problems come from three sources: <strong>imagery</strong> (low-resolution, wrongly cropped, duplicated or unsuitable photos), <strong>key information pushed out of view</strong> (schedule, map, mobile hero) and <strong>long, stacked mobile layouts</strong> that read as congested. Fixing the six critical items and the image set will make the biggest visible difference.</p>
+
+  <h2 id="findings">All findings</h2>
+  <p class="lead">Ordered by severity. File references are relative to the project root.</p>
+  <div class="filters" role="group" aria-label="Filter by severity">
+    <button type="button" data-f="all" aria-pressed="true">All (34)</button>
+    <button type="button" data-f="crit" aria-pressed="false">Critical (6)</button>
+    <button type="button" data-f="high" aria-pressed="false">High (10)</button>
+    <button type="button" data-f="med" aria-pressed="false">Medium (10)</button>
+    <button type="button" data-f="low" aria-pressed="false">Low / code (8)</button>
+  </div>
+
+  <!-- CRITICAL -->
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C1</span> The hero headline cuts off the “g” in “Yoga” <span class="chip crit">Critical</span></h3>
+    <p class="where">Home · all viewports · <code>components/home/HomeHero.tsx:35-38</code></p>
+    <p>The reveal mask (<code>overflow-hidden</code> + <code>pb-2</code>) is shorter than the descender at <code>leading-[0.9]</code> and 11.5rem type, so the “g” loses its tail and reads as “Yoqa”. It is the first thing every visitor sees.</p>
+    <figure><img src="img/hero-clipped-g.webp" alt="Homepage hero: the g in Yoga is clipped at the baseline" width="880" height="300" loading="lazy"><figcaption>Desktop 1440×900: the descender of the “g” is cut off.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> give the mask room in em units, e.g. <code>pb-[0.18em]</code> on the wrapper span, or use <code>clip-path: inset(0 0 -0.25em 0)</code> instead of <code>overflow-hidden</code>.</div>
+  </article>
+
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C2</span> Navigation becomes unreadable over the light half of split heroes <span class="chip crit">Critical</span></h3>
+    <p class="where">All 12 class pages, Schedule, Café, Find Us, Canggu · desktop · <code>components/layout/Header.tsx:41-48</code>, <code>components/ui/PageHero.tsx:18-34</code></p>
+    <p>The transparent header uses cream text with a gradient that fades out. On split heroes the right half is a bright photo, so “Cafe”, “Our Story” and “Find Us” sit cream-on-white (well under 2:1 contrast). The “Cafe” link even straddles the colour boundary.</p>
+    <figure><img src="img/header-over-light-image.webp" alt="Header links over a bright photo on the Bikram page" width="1100" height="99" loading="lazy"><figcaption>Bikram Yoga page: the right-hand links disappear into the photo.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> make the header solid (<code>bg-forest</code>) on split-hero pages, or extend a full-width dark scrim (at least 60% opacity) behind the header. You could also pass a <code>tone</code> prop from <code>PageHero</code>.</div>
+  </article>
+
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C3</span> The Schedule page hides the schedule below the fold <span class="chip crit">Critical</span></h3>
+    <p class="where">/ubud-yoga-centre-class-schedule/ · all viewports · <code>app/ubud-yoga-centre-class-schedule/page.tsx</code></p>
+    <p>A 78svh hero plus section padding means no class times are visible on first load: they start at roughly 880px on desktop and below the first screen on a 768px laptop and on mobile. People come to this page for one thing, and it isn't a photo.</p>
+    <figure><img src="img/schedule-below-fold.webp" alt="Schedule page first screen showing only a hero and empty space" width="1000" height="625" loading="lazy"><figcaption>1440×900 first screen: the timetable is just below the bottom edge.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> replace the hero with the compact <code>TitleBand</code> (about 260px), show “Today” first, and keep the timetable within the first screen. Drop the duplicate “Classes &amp; Pricing / Get Directions” buttons here.</div>
+  </article>
+
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C4</span> The Find Us map advertises competitors instead of pinning the studio <span class="chip crit">Critical</span></h3>
+    <p class="where">/our-location/ · all viewports · <code>content/site.ts:13</code> (<code>mapEmbed</code>)</p>
+    <p>The embed is a text search, so Google shows a wide area labelled with The Yoga Barn, Ubud Yoga House, Bali Yoga Center and others, with no clear marker for Ubud Yoga Centre. Below it, two printed flyers (the van artwork and a leaflet map) carry 6–8px text that can't be read and is cut off on the right.</p>
+    <figure><img src="img/map-competitors-print-art.webp" alt="Map embed showing other yoga studios, above two printed flyers" width="1000" height="507" loading="lazy"><figcaption>Find Us: competitor pins, no studio pin, and unreadable print artwork.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> embed by Place ID (<code>https://www.google.com/maps/embed/v1/place?q=place_id:…</code>) or use <code>?q=Ubud+Yoga+Centre&amp;z=16&amp;output=embed</code> with the exact business name. Replace the flyers with one clear photo of the entrance plus a short written route (“From Monkey Forest Rd, cross the Nyuh Kuning bridge…”).</div>
+  </article>
+
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C5</span> The mobile hero is a blurry 26% crop of a landscape photo <span class="chip crit">Critical</span></h3>
+    <p class="where">Home · 390×844 · <code>components/home/HomeHero.tsx:22-29</code></p>
+    <p>One 1672×940 landscape file fills a portrait phone screen, so only about a quarter of the image is visible and it's upscaled about 2.3× (on a 3× phone, about 7×). The result is soft and muddy behind the biggest text on the site. A <code>hero-tablet.jpg</code> existed but was never used.</p>
+    <figure class="phone"><img src="img/mobile-hero-blurry.webp" alt="Mobile hero: soft, cropped building behind the headline" width="390" height="844" loading="lazy"><figcaption>390×844: the crop shows only the building's window and is visibly soft.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> art-direct with a portrait source, either via <code>&lt;picture&gt;</code> and a <code>media="(max-width: 767px)"</code> source, or with two <code>Image</code>s toggled by <code>md:hidden</code>/<code>hidden md:block</code>. The portrait source should be at least 1170×2532 for retina.</div>
+  </article>
+
+  <article class="f" data-sev="crit">
+    <h3><span class="id">C6</span> The Canggu schedule and price list are images of text, served blurry <span class="chip crit">Critical</span></h3>
+    <p class="where">/welcome-to-canggu-yoga-centre/ · all viewports · <code>app/welcome-to-canggu-yoga-centre/page.tsx:42-48</code>, <code>components/ui/Gallery.tsx:48</code></p>
+    <p>The timetable and prices are posters. Screen readers and search engines can't read them, and they can't be updated without a designer. <code>Gallery</code>'s default <code>sizes</code> (25vw) is wrong for this two-column layout, so the browser fetched a 359px-wide file for a 772px-wide box: the small print turns to mush. On mobile the poster text is about 4px.</p>
+    <figure><img src="img/canggu-images-of-text.webp" alt="Canggu poster schedule and price list rendered as images" width="1000" height="625" loading="lazy"><figcaption>Images of text: not selectable, not translatable, and soft.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> render both as HTML (reuse <code>ScheduleBoard</code> and <code>PriceCards</code> with Canggu data). Short-term, pass <code>sizes="(min-width:768px) 50vw, 100vw"</code> to this <code>Gallery</code>.</div>
+  </article>
+
+  <!-- HIGH -->
+  <article class="f" data-sev="high">
+    <h3><span class="id">H1</span> Low-resolution photos stretched past their native size <span class="chip high">High</span></h3>
+    <p class="where">Site-wide · see the <a href="#images">image inventory</a></p>
+    <ul>
+      <li><code>hero-desktop</code> is 1672px wide but shown full-bleed at 1440–1920px, and needs about 2880px for retina screens.</li>
+      <li><code>ubudyogacentre-studio-carousel</code> is 1280×650 but used full-bleed on the Our Story hero and the home closing CTA.</li>
+      <li><code>img_3701</code> is a 1200×450 panorama squeezed into tall bento tiles and square tiles, showing 32–40% of the image, and is pixelated.</li>
+      <li><code>img_1886</code> and <code>img_0802</code> are 800×500 and shown at 750px+ on Our Story.</li>
+      <li>Class heroes (<code>bikram-f1</code>, <code>inferno-hot-pilates-f1</code>, <code>hot-barre-f3</code>, <code>kundalini-yoga-f2</code>) are 1280px video stills with compression blocking.</li>
+    </ul>
+    <figure><img src="img/video-poster-bento.webp" alt="Blurry bento tiles and a video poster with its own title" width="1000" height="625" loading="lazy"><figcaption>Home: pixelated bento tiles (right) next to a sharp photo.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> ask the studio for camera originals (2400px or wider for heroes, 1600px for cards). If none exist, move weak images to small slots only and never full-bleed. Full-bleed needs a 1920px+ source.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H2</span> Landscape photos are forced into portrait class cards <span class="chip high">High</span></h3>
+    <p class="where">Home “Hot or regular” rail · desktop · <code>components/home/ClassRail.tsx:61</code> (<code>aspect-[3/4]</code>, <code>lg:h-[58svh] lg:w-[22rem]</code>)</p>
+    <p>All 12 card photos are about 4:3 landscape. In 352×522 portrait frames only 42–49% of each photo shows, so faces and limbs are cut: Hot TRX is a chin and shoulder, Yin is two legs, Hatha is a torso.</p>
+    <figure><img src="img/class-rail-crops.webp" alt="Class rail cards with heavily cropped photos" width="1000" height="625" loading="lazy"><figcaption>Desktop rail: the first card is clipped by the viewport and photos are cut mid-body.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> use <code>aspect-[4/3]</code> cards (like <code>ClassGrid</code>), or set a per-image <code>objectPosition</code> focal point in <code>content/classes.ts</code>, or supply portrait crops.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H3</span> The same photos repeat, sometimes side by side <span class="chip high">High</span></h3>
+    <p class="where">Home, Pricing, Schedule, Retreats, Gallery · <code>app/page.tsx:40,197-201</code></p>
+    <ul>
+      <li><code>uyc-card-shop</code> appears twice on the homepage (day cards and bento).</li>
+      <li><code>ugc-8</code> (barre) is in the bento and again in the Instagram strip directly below, both visible on one screen.</li>
+      <li><code>homepage-video-poster-class</code> is the home video poster and the Classes &amp; Pricing hero.</li>
+      <li><code>p2_3</code> (Bikram) is a class card, the Schedule hero, a related-class card and a gallery photo.</li>
+      <li><code>img_3701</code>, <code>p10_photo_1</code> and <code>nidra-class-card</code> are reused on Home, Retreats, Space Rental and Gallery.</li>
+    </ul>
+    <figure><img src="img/duplicates-social-graphics.webp" alt="Barre photo shown twice on one screen, plus Instagram graphics with text" width="1000" height="625" loading="lazy"><figcaption>One screen: the same barre photo in the bento (top right) and the Instagram strip (fourth tile).</figcaption></figure>
+    <div class="fix"><b>Fix:</b> keep a simple image-to-page map in <code>content/</code> and allow each photo once per page. The gallery is the only place for “everything”.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H4</span> Unsuitable images: baked-in text, screenshots, print art, generic or rendered heroes <span class="chip high">High</span></h3>
+    <p class="where">Home, Café, Find Us, Beginners, Gallery</p>
+    <ul>
+      <li><strong>Instagram strip:</strong> social graphics with headline text (“7 Things People Get Wrong About Bali Aerial Yoga”, “DON'T STOP / DO IT”, “Be Open to be A Beginner”) clash with the site's typography and look like ads.</li>
+      <li><strong>Café photo strip:</strong> five PNG screenshots from a menu, with labels cut mid-word (“The Protein B…”, “Zucchini Pa…”). The “Before or after class” card uses a soft 516px screenshot, with white text over a bright sky.</li>
+      <li><strong>Video poster:</strong> the YouTube thumbnail has its own “UBUD YOGA CENTRE” title. The play button sits on top of it (“CEN▶E”), and a second caption is overlaid at the bottom.</li>
+      <li><strong>Home hero:</strong> it looks like a rendered or AI-generated image of a glass box, while the real building (Our Story, Find Us) is board-formed concrete with a green roof. Visitors who arrive and see something different may feel misled. Confirm it's a real photo or replace it.</li>
+      <li><strong>Beginner's Guide hero:</strong> a generic stock-style mat, towel and bottle with nothing specific to the studio.</li>
+      <li><strong>Gallery:</strong> “The Plunge” text overlay; a white-water rafting photo with no studio context.</li>
+    </ul>
+    <figure><img src="img/cafe-strip-screenshots.webp" alt="Café strip with cropped menu-label screenshots" width="1100" height="160" loading="lazy"><figcaption>Café: screenshot tiles with partial labels.</figcaption></figure>
+    <figure><img src="img/cafe-blurry-card.webp" alt="Blurry juice photo with low-contrast text over it" width="470" height="360" loading="lazy"><figcaption>Café: soft screenshot with low-contrast overlay text.</figcaption></figure>
+    <figure><img src="img/beginners-generic-hero.webp" alt="Generic mat, towel and bottle hero on the Beginner's Guide" width="1000" height="625" loading="lazy"><figcaption>Beginner's Guide: generic imagery, nothing about this studio.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> use clean photos only (no text in images), shoot real dishes on the café terrace, use a still from the film without the title as the poster, and use a real first-timer moment at the studio (check-in desk, towel rental) for Beginners.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H5</span> The pinned horizontal class rail hijacks about 3,000px of scrolling <span class="chip high">High</span></h3>
+    <p class="where">Home · ≥1024px · <code>components/home/ClassRail.tsx:19-40, 43-44</code></p>
+    <p>On desktop the page stops scrolling down and slides sideways through 12 cards. There is no progress indicator or skip, and the first card begins clipped by the left edge. The section is centred inside 100svh with <code>lg:pt-24</code>, leaving a roughly 150px empty band above the heading while the heading almost touches the cards (about 30px).</p>
+    <div class="fix"><b>Fix:</b> use a native scroll-snap row with prev/next buttons and a “1 / 12” counter, or a 4×3 grid that links to the full Classes page. If the pin stays, cap it at 6 featured classes and add a visible progress bar.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H6</span> The floating WhatsApp button covers links and footer text <span class="chip high">High</span></h3>
+    <p class="where">All pages · <code>components/layout/WhatsAppFloat.tsx:34</code></p>
+    <p>It sits on the “Discover our space” link on mobile, on the right-hand CTA button in every terracotta CTA band (desktop), and on the footer's “Part of the Yoga42 Indonesia family” line. Hit-testing makes the covered links untappable.</p>
+    <figure class="phone"><img src="img/mobile-whatsapp-overlap.webp" alt="WhatsApp button covering a text link on mobile" width="390" height="364" loading="lazy"><figcaption>Mobile: the button covers the start of “Discover our space”.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> add <code>padding-bottom: 5.5rem</code> to the footer on mobile, hide the float once the footer is in view (IntersectionObserver), and keep CTA rows clear of the bottom-right 80×80px.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H7</span> More sections follow the closing CTA, so three heavy colour bands stack up <span class="chip high">High</span></h3>
+    <p class="where">Pricing, Café, Our Story, Schedule · <code>app/cafe/page.tsx:50-58</code>, <code>app/our-story/page.tsx:117-125</code>, <code>app/yoga-classes-pricing/page.tsx</code>, <code>app/ubud-yoga-centre-class-schedule/page.tsx</code></p>
+    <p>The terracotta CTA band is followed by the dark-green Health &amp; Safety section and then the darker-green footer. Three saturated full-width blocks in a row feel heavy and weaken the call to action.</p>
+    <figure><img src="img/ending-stack-whatsapp.webp" alt="Terracotta CTA band followed by Health and safety and the footer" width="1000" height="625" loading="lazy"><figcaption>Pricing page ending: CTA, then Health &amp; Safety, then the footer.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> move <code>&lt;HealthSafety /&gt;</code> above <code>&lt;CtaBand /&gt;</code> and restyle it on a light background (<code>bg-sand</code>), or fold it into the FAQ accordion. The CTA band should be the last thing before the footer.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H8</span> Mobile pages are very long and feel congested <span class="chip high">High</span></h3>
+    <p class="where">390×844 · see <a href="#fit">fit-to-screen table</a></p>
+    <ul>
+      <li>Classes &amp; Pricing is 10,609px (12.6 screens); “Our Classes” alone is 5,893px (7 screens) of full-width cards.</li>
+      <li>Home is 9,236px; “Make it your kind of day” is three 4:5 cards (1.9 screens); price cards are stacked (1.4 screens).</li>
+      <li>Café menu: 3,431px (4 screens) of continuous cards.</li>
+      <li>Footer: 963px (1.14 screens) with every link repeated in a single column.</li>
+    </ul>
+    <div class="fix"><b>Fix:</b> on mobile, show class cards as a 2-column compact grid (image 1:1, name, duration), put the day cards and price cards in a horizontal snap row, make the menu an accordion by section, and collapse the footer columns into a <code>&lt;details&gt;</code> group.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H9</span> Price cards have no visible edge on the light pricing band <span class="chip high">High</span></h3>
+    <p class="where">Home pricing · all viewports · <code>components/ui/PriceCards.tsx:14-16</code></p>
+    <p>Non-featured cards use <code>bg-sand</code> on a <code>bg-sand</code> section, so three of the four cards have no boundary. The prices float, the left edges don't line up with the heading, and on mobile the stacked prices run together.</p>
+    <figure class="phone"><img src="img/mobile-price-cards.webp" alt="Mobile price cards blending into the background" width="390" height="844" loading="lazy"><figcaption>Mobile: prices without card edges, separated only by space.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> use <code>bg-cream</code> (or a <code>border border-forest/10</code>) for the light tone so each card reads as a unit.</div>
+  </article>
+
+  <article class="f" data-sev="high">
+    <h3><span class="id">H10</span> The “Classes &amp; Pricing” call to action is repeated everywhere <span class="chip high">High</span></h3>
+    <p class="where">Header + home hero · <code>components/layout/Header.tsx:86-92</code>, <code>components/home/HomeHero.tsx:53</code></p>
+    <p>The header pill and the hero's primary button say the same thing side by side, and the header pill still shows on the Classes &amp; Pricing page itself, where it links to the current page. Repeating one CTA dilutes it and leaves no room for the most-wanted action on each page (today's schedule, directions).</p>
+    <div class="fix"><b>Fix:</b> change the header pill to “Today's Classes” (→ schedule), hide it on the page it links to, and give the hero a single primary CTA.</div>
+  </article>
+
+  <!-- MEDIUM -->
+  <article class="f" data-sev="med">
+    <h3><span class="id">M1</span> Text below 12px and low-contrast labels <span class="chip med">Medium</span></h3>
+    <p class="where">Site-wide</p>
+    <ul>
+      <li>“Hot”, “Most popular”, “Today” and “VV” chips are 10.4px (<code>text-[0.65rem]</code>) in uppercase with wide tracking.</li>
+      <li><code>label-caps</code> is 12px with 0.2em tracking and is used for “Full schedule”, “Watch the film” and every <code>dt</code> label.</li>
+      <li>Gold-deep labels on sand (“Dates”, “Teacher”, “WhatsApp”, “Email”) measure 4.41:1 at 12px, failing AA (4.5:1).</li>
+      <li>On Pricing, “IDR” measures 3.57:1, and “Valid 30 days · Save 21%” on terracotta measures 4.20:1.</li>
+      <li>The day-card numbers “01 / 02 / 03” (cream/80 over photos) are barely visible.</li>
+    </ul>
+    <div class="fix"><b>Fix:</b> set a 12px minimum and 13px for uppercase labels, use <code>text-gold-deep</code> only on cream (not sand), and raise the IDR opacity to 85%.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M2</span> Copy errors <span class="chip med">Medium</span></h3>
+    <ul>
+      <li>“Your Daily <strong>Practise</strong>” (<code>app/page.tsx:51</code>): in British English the noun is “practice”; “practise” is the verb.</li>
+      <li>Under “What to bring”, the first item is “Mat included”, which isn't something to bring (<code>content/classes.ts</code>).</li>
+      <li>Menu legend “V vegan · VV vegetarian” (<code>content/cafe.ts</code>) is the reverse of the usual convention (V = vegetarian, VG = vegan) and will confuse guests.</li>
+      <li>“Cafe” in the nav and footer, but “Café” as the page heading.</li>
+      <li>The Our Story stat “Yoga42 / Indonesia family” isn't a statistic, unlike its neighbours (2004, 3).</li>
+    </ul>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M3</span> Card contents misaligned across rows <span class="chip med">Medium</span></h3>
+    <ul>
+      <li>Home “Make it your kind of day”: the Lifestyle Shop card has no CTA, so its title sits about 44px lower than the other two (<code>app/page.tsx:84-118</code>).</li>
+      <li>Class rail: “Kundalini Yoga &amp; Meditation” wraps to two lines and pushes its meta line out of line with its neighbours. On mobile the Bikram meta breaks as “40.6 °C / 105 / °F”.</li>
+      <li>Home pricing on desktop: the “Pricing &amp; policy” link aligns with the subtitle, not the heading.</li>
+    </ul>
+    <figure><img src="img/shop-card-misaligned.webp" alt="Three day cards with the third card's text lower" width="1000" height="625" loading="lazy"><figcaption>The third card's title and text sit lower than the first two.</figcaption></figure>
+    <div class="fix"><b>Fix:</b> give the shop card a CTA (“Visit the shop” → Our Story or Instagram) or reserve the CTA row height. Use <code>text-balance</code> and a fixed two-line title block on rail cards, and add <code>whitespace-nowrap</code> to temperature values.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M4</span> Uneven vertical rhythm and dead zones <span class="chip med">Medium</span></h3>
+    <ul>
+      <li>“Make it your kind of day” starts 32px below the marquee (<code>pt-8</code>), while the next section has about 150px of empty space above its heading.</li>
+      <li>Bento intro “A space to practise”: the heading is pinned top and the paragraph bottom, with about 200px of empty dark space between them (<code>justify-between</code>).</li>
+      <li>Split heroes (class pages, Café, Find Us, Canggu) leave the top half of the dark panel empty.</li>
+      <li>Our Story “Our facilities”: the left column ends about 400px above the image grid.</li>
+      <li>Pricing FAQ: “Studio policy” (5 items) sits beside “Your first visit” (8 items), leaving an empty lower-right block.</li>
+    </ul>
+    <div class="fix"><b>Fix:</b> use one section rhythm (<code>section-y</code> top and bottom everywhere), set bento intro to <code>justify-start gap-8</code>, make the facilities column <code>lg:sticky lg:top-28</code>, and give split heroes <code>justify-center</code> with a smaller min-height (60svh).</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M5</span> The gate watermark collides with the logo and titles <span class="chip med">Medium</span></h3>
+    <p class="where">Split heroes, mobile · <code>components/ui/PageHero.tsx:22</code></p>
+    <p>The 18rem <code>GateMark</code> at <code>-top-6 -left-10</code> sits directly behind the header logo. On mobile it shows as a grey smudge behind the H1.</p>
+    <div class="fix"><b>Fix:</b> move it to the bottom-right of the text panel (<code>-right-10 -bottom-10</code>), or hide it below <code>lg</code>.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M6</span> The desktop timetable is congested and has no legend <span class="chip med">Medium</span></h3>
+    <p class="where">/ubud-yoga-centre-class-schedule/ · ≥1024px · <code>components/classes/ScheduleBoard.tsx:43-55</code></p>
+    <p>Seven 180px columns force most class names onto two lines, and the grid is 1.22 screens tall on a 768px laptop. Hot and regular are shown only by a faint pink or green tint and border, with no legend and no filter.</p>
+    <div class="fix"><b>Fix:</b> add a “Hot / Regular” legend with filter chips (reuse the <code>ClassGrid</code> filter), drop the 2-line names with a shorter display name (“Inferno Pilates”), and put a “HOT” badge on the card instead of relying on colour alone.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M7</span> Footer repeats links and has small tap targets <span class="chip med">Medium</span></h3>
+    <p class="where"><code>components/layout/Footer.tsx:35-36, 93</code></p>
+    <p>“First Visit Guide” and “Events &amp; Training” appear in both “Visit” and “Explore”. On mobile each link is 22px tall, below the 44px minimum.</p>
+    <div class="fix"><b>Fix:</b> remove the duplicates from “Explore” and add <code>py-2</code> (or <code>min-h-11 inline-flex items-center</code>) to footer links on mobile.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M8</span> Hero text sits over busy, bright parts of photos <span class="chip med">Medium</span></h3>
+    <p class="where">Home hero (right column), home closing CTA, Classes &amp; Pricing hero, Beginner's Guide hero</p>
+    <p>“Nyuh Kuning · Ubud, Bali” sits over a bright interior window. “Your next class starts here.” crosses pale concrete. “Classes &amp; Pricing” runs across a person's chest. The gradients are bottom-weighted, so the right and centre of the text get little scrim.</p>
+    <div class="fix"><b>Fix:</b> add a left-to-right or radial scrim behind text blocks, choose crops where the text area is calm, and avoid placing text over faces or bodies.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M9</span> Event cards and pages repeat the same information <span class="chip med">Medium</span></h3>
+    <p class="where"><code>app/events/page.tsx:40-44</code>, <code>app/event/[slug]/page.tsx:44-46</code></p>
+    <p>Each card shows the date three times (the poster, a “12 JUL” badge and “July 12–14, 2027”) and the title twice (poster and H2). The event page hero is 1.11 screens tall on a laptop because the full poster sits beside the H1.</p>
+    <div class="fix"><b>Fix:</b> use a clean photo of Gabi Walters instead of the poster, keep the date badge or the date line (not both), and cap the hero image at <code>max-h-[70svh]</code>.</div>
+  </article>
+
+  <article class="f" data-sev="med">
+    <h3><span class="id">M10</span> Mobile split heroes push the photo below a full screen of text <span class="chip med">Medium</span></h3>
+    <p class="where">Class pages, Schedule, Café, Find Us · 390px</p>
+    <p>On phones the text panel (title, lead, two stacked buttons, a 2×2 stats grid) fills the first screen and the photo starts below it, cropped to <code>min-h-[56vw]</code>, which cuts off heads in the Bikram photo. The Bikram hero is 1.07 screens before any content.</p>
+    <div class="fix"><b>Fix:</b> on mobile, put the photo first as a 16:10 band (about 240px), then the title and one primary button. Put the buttons side by side and move the stats grid below the fold.</div>
+  </article>
+
+  <!-- LOW -->
+  <article class="f" data-sev="low">
+    <h3><span class="id">L1</span> Definition list in the wrong order <span class="chip low">Low</span></h3>
+    <p class="where"><code>app/our-story/page.tsx:43-46</code></p>
+    <p><code>&lt;dd&gt;</code> is rendered before <code>&lt;dt&gt;</code>, which is invalid, so screen readers announce the value before its label.</p>
+    <div class="fix"><b>Fix:</b> render <code>dt</code> first and reorder visually with <code>flex-col-reverse</code>.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L2</span> Content is invisible until JavaScript runs <span class="chip low">Low</span></h3>
+    <p class="where"><code>components/ui/Reveal.tsx:23</code>, <code>components/home/TodayClasses.tsx:29</code></p>
+    <p>Every <code>Reveal</code> starts at <code>opacity: 0</code>, and today's classes list is <code>opacity-0</code> until hydration. On slow mobile connections whole sections flash in late, and with JavaScript disabled they never appear.</p>
+    <div class="fix"><b>Fix:</b> animate only <code>transform</code> (keep opacity at 1) or gate the hidden state behind a <code>.js</code> class set in <code>&lt;head&gt;</code>. Server-render “Today” using Bali time at build or request time.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L3</span> Dialogs don't trap or return focus <span class="chip low">Low</span></h3>
+    <p class="where"><code>components/layout/Header.tsx:163-213</code>, <code>components/ui/Gallery.tsx</code>, <code>components/ui/VideoLightbox.tsx</code></p>
+    <p>The mobile menu, gallery lightbox and video modal use <code>autoFocus</code> on close but don't keep Tab inside the dialog or return focus to the trigger. The menu has no current-page indicator.</p>
+    <div class="fix"><b>Fix:</b> use the native <code>&lt;dialog&gt;</code> with <code>showModal()</code>, which gives focus containment and Escape for free, and restore focus on close.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L4</span> Five links with the same accessible name <span class="chip low">Low</span></h3>
+    <p class="where"><code>app/page.tsx:225</code></p>
+    <p>All five Instagram tiles are announced as “Ubud Yoga Centre on Instagram”.</p>
+    <div class="fix"><b>Fix:</b> make the strip one link, or describe each photo (“Aerial class on Instagram”).</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L5</span> The class filter isn't kept in the URL <span class="chip low">Low</span></h3>
+    <p class="where"><code>components/classes/ClassGrid.tsx:12</code></p>
+    <p>Choosing “Hot” can't be shared or restored with Back.</p>
+    <div class="fix"><b>Fix:</b> sync with <code>?type=hot</code> via <code>useSearchParams</code>, and link “Hot” chips elsewhere straight to it.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L6</span> The marquee can't be paused on touch screens <span class="chip low">Low</span></h3>
+    <p class="where"><code>components/ui/Marquee.tsx:16</code></p>
+    <p>It pauses on hover only. Touch users can't stop it (WCAG 2.2.2 applies to motion lasting more than 5 seconds).</p>
+    <div class="fix"><b>Fix:</b> pause it when off-screen and add a small pause button, or make it static on touch devices.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L7</span> The parallax zoom makes Next fetch undersized images <span class="chip low">Low</span></h3>
+    <p class="where"><code>components/ui/Parallax.tsx:30</code> + <code>sizes="100vw"</code> / <code>"50vw"</code></p>
+    <p>Images are rendered at 108% scale but requested for 100%, so the browser picks the next-smaller variant (for example a 1254px file for a 1555px box at 1440px).</p>
+    <div class="fix"><b>Fix:</b> pass <code>sizes="110vw"</code> (or <code>55vw</code> for split heroes) wherever <code>Parallax</code> wraps an <code>Image</code>.</div>
+  </article>
+
+  <article class="f" data-sev="low">
+    <h3><span class="id">L8</span> Three animation libraries for one marketing site <span class="chip low">Low</span></h3>
+    <p class="where"><code>package.json</code></p>
+    <p>GSAP + ScrollTrigger, Motion and Lenis all ship to every page (First Load JS 201–213 kB). Motion handles reveals and dialogs, and GSAP only parallax and the rail pin.</p>
+    <div class="fix"><b>Fix:</b> pick one. Motion's <code>useScroll</code> covers parallax, and if the rail pin goes (H5), GSAP and Lenis can be removed.</div>
+  </article>
+
+  <!-- FIT TO SCREEN -->
+  <h2 id="fit">Fit-to-screen measurements</h2>
+  <p class="lead">Section height divided by viewport height, measured in the browser after all reveal animations had run. Red cells are taller than one screen. Long content such as the menu or gallery can scroll, but marketing sections should fit within one screen each.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Page</th><th>Section</th><th>Desktop 1440×900</th><th>Laptop 1366×768</th><th>Mobile 390×844</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td>Home</td><td>Your Daily Practise</td><td class="n">0.86</td><td class="n">1.00</td><td class="n over">1.31</td><td>Show 4 classes plus “+3 more” on mobile</td></tr>
+        <tr><td>Home</td><td>Make it your kind of day</td><td class="n">0.86</td><td class="n">0.98</td><td class="n over">1.87</td><td>Horizontal snap row on mobile</td></tr>
+        <tr><td>Home</td><td>Hot or regular (rail)</td><td class="n">1.00 + 3,000px pin</td><td class="n">1.00 + pin</td><td class="n">0.76</td><td>Remove the pin (H5)</td></tr>
+        <tr><td>Home</td><td>One price. Every class.</td><td class="n">0.62</td><td class="n">0.72</td><td class="n over">1.36</td><td>2×2 grid on mobile</td></tr>
+        <tr><td>Home</td><td>What our students say</td><td class="n">0.80</td><td class="n">0.93</td><td class="n over">1.20</td><td>Reviews as a swipe row</td></tr>
+        <tr><td>Home</td><td>A space to practise (bento)</td><td class="n">0.95</td><td class="n">0.95</td><td class="n over">1.07</td><td>Close the dead space (M4)</td></tr>
+        <tr><td>All pages</td><td>Footer</td><td class="n">0.37</td><td class="n">0.44</td><td class="n over">1.14</td><td>Collapse columns on mobile (H8, M7)</td></tr>
+        <tr><td>Classes &amp; Pricing</td><td>Passes &amp; Pricing</td><td class="n">0.57</td><td class="n">0.66</td><td class="n over">1.33</td><td>2×2 grid on mobile</td></tr>
+        <tr><td>Classes &amp; Pricing</td><td>Our Classes</td><td class="n over">2.59</td><td class="n over">2.98</td><td class="n over">6.98</td><td>2-column compact cards on mobile, 4 columns at ≥1280px</td></tr>
+        <tr><td>Classes &amp; Pricing</td><td>Your first visit / Studio policy</td><td class="n">0.81</td><td class="n">0.95</td><td class="n over">1.28</td><td>Fine as an accordion; merge the two lists</td></tr>
+        <tr><td>Class page (Bikram)</td><td>Hero</td><td class="n">0.78</td><td class="n">0.81</td><td class="n over">1.07</td><td>Photo-first mobile hero (M10)</td></tr>
+        <tr><td>Class page (Bikram)</td><td>About this class</td><td class="n">0.83</td><td class="n">0.97</td><td class="n over">1.68</td><td>Move “When it runs” to the top on mobile</td></tr>
+        <tr><td>Class page (Bikram)</td><td>What to expect / Other classes</td><td class="n">0.54 / 0.64</td><td class="n">0.66 / 0.73</td><td class="n over">1.20 / 1.21</td><td>Swipe rows on mobile</td></tr>
+        <tr><td>Café</td><td>Menu</td><td class="n over">1.54</td><td class="n over">1.80</td><td class="n over">4.07</td><td>Tabs or accordion per menu section</td></tr>
+        <tr><td>Schedule</td><td>This week</td><td class="n">1.00 (below fold)</td><td class="n over">1.22</td><td class="n">0.98</td><td>Remove the hero (C3)</td></tr>
+        <tr><td>Our Story</td><td>Our facilities</td><td class="n over">1.12</td><td class="n over">1.28</td><td class="n over">1.21</td><td>Smaller image grid, sticky text</td></tr>
+        <tr><td>Find Us</td><td>Get in touch</td><td class="n">0.60</td><td class="n">0.73</td><td class="n over">1.24</td><td>Map height 50svh on mobile</td></tr>
+        <tr><td>Canggu</td><td>Schedule &amp; prices</td><td class="n over">1.18</td><td class="n over">1.34</td><td class="n over">1.19</td><td>Render as HTML (C6)</td></tr>
+        <tr><td>Event</td><td>Hero</td><td class="n">0.97</td><td class="n over">1.11</td><td class="n over">1.27</td><td>Cap the poster or photo height (M9)</td></tr>
+        <tr><td>Beginner's Guide</td><td>Before you come / In the studio</td><td class="n">0.61 / 0.55</td><td class="n">0.71 / 0.68</td><td class="n over">1.35 / 1.39</td><td>Accordion on mobile</td></tr>
+        <tr><td>Host a Retreat</td><td>What we can do for you</td><td class="n over">1.02</td><td class="n over">1.16</td><td class="n over">1.55</td><td>Tighter chip lists</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Full page heights on mobile: Home 9,236px · Classes &amp; Pricing 10,609px · Café 6,719px · Bikram 5,997px · Beginner's Guide 4,936px. No page has horizontal overflow at any tested width, and every page has exactly one H1 with no skipped heading levels.</p>
+
+  <!-- IMAGE INVENTORY -->
+  <h2 id="images">Image inventory: what to replace</h2>
+  <p class="lead">Native size compared with how large the image is displayed. “Visible” is the share of the photo left after <code>object-cover</code> cropping.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>File</th><th>Native</th><th>Where</th><th>Problem</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><code>hero-desktop</code></td><td class="n">1672×940</td><td>Home hero, gallery</td><td>Upscaled on desktop; 26% visible on mobile; looks rendered</td><td>Real photo, 2880px+, plus a portrait crop</td></tr>
+        <tr><td><code>ubudyogacentre-studio-carousel</code></td><td class="n">1280×650</td><td>Our Story hero, home CTA</td><td>Full-bleed at 1440px+ is soft; 30–39% visible on mobile</td><td>2400px original</td></tr>
+        <tr><td><code>img_3701…</code> (café panorama)</td><td class="n">1200×450</td><td>Home bento, Space Rental, Retreats</td><td>32–40% visible in tall or square tiles; pixelated</td><td>Use only in wide 8:3 slots</td></tr>
+        <tr><td><code>img_1886…</code>, <code>img_0802…</code></td><td class="n">800×500</td><td>Bento, Our Story</td><td>Shown at 750px+</td><td>Higher-resolution originals</td></tr>
+        <tr><td>Class card photos <code>p2_3 … p15</code>, <code>nidra-class-card</code></td><td class="n">~950×690</td><td>Home rail (3:4)</td><td>42–49% visible, heads cut</td><td>Use 4:3 cards or portrait crops</td></tr>
+        <tr><td><code>p4_8</code> (Hot TRX)</td><td class="n">552×399</td><td>Rail, grid, related</td><td>Undersized everywhere</td><td>Replace</td></tr>
+        <tr><td>Class heroes <code>*-f1/f2/f3</code></td><td class="n">1280×720</td><td>Class split heroes</td><td>Video stills with compression artefacts</td><td>Photograph each class</td></tr>
+        <tr><td><code>image_2026-09-12_*</code> (5 PNGs)</td><td class="n">482–672px</td><td>Café strip and card, gallery</td><td>Screenshots with cropped labels</td><td>Real food photos</td></tr>
+        <tr><td><code>ugc-2/3/5/9</code></td><td class="n">720–1080px</td><td>Instagram strip</td><td>Social graphics with headline text</td><td>Clean photos or a live feed widget</td></tr>
+        <tr><td><code>UYC_Location_*</code></td><td class="n">2250 / 1123px</td><td>Find Us</td><td>Print artwork with unreadable text</td><td>Entrance photo plus written route</td></tr>
+        <tr><td><code>canggu-*</code> posters</td><td class="n">3508 / 2481px</td><td>Canggu</td><td>Images of text, served at 359px</td><td>HTML content (C6)</td></tr>
+        <tr><td><code>hot-pilates-level-*</code></td><td class="n">1122×1402</td><td>Events, event page</td><td>Poster duplicates title and dates</td><td>Teacher photo</td></tr>
+        <tr><td><code>uyc-first-visit-essentials</code></td><td class="n">1200×800</td><td>Beginner's hero</td><td>Generic stock-style image; 39% visible on mobile</td><td>Real studio moment</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OPTIMISATION -->
+  <h2 id="optimise">Vercel size optimisation <span class="chip ok">Done</span></h2>
+  <p class="lead">These changes are already applied in the project. A production build (<code>next build</code>) passes: 29 static pages, unchanged JS size.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Item</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>public/images</code></td><td class="n">16.6 MB · 61 files (JPG/PNG/WebP)</td><td class="n">5.3 MB · 60 files (WebP + 3 small PNG logos + og.jpg)</td></tr>
+        <tr><td>Largest single image</td><td class="n">1.44 MB (event poster PNG)</td><td class="n">325 KB (home hero)</td></tr>
+        <tr><td>Source uploaded to Vercel (excl. node_modules/.next)</td><td class="n">≈ 17 MB</td><td class="n">≈ 6.0 MB</td></tr>
+        <tr><td>Optimised-image variants Vercel can generate per image</td><td class="n">2 formats × 16 widths = 32</td><td class="n">1 format × 8 widths = 8</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>What changed:</strong></p>
+  <ul>
+    <li><code>scripts/optimize-images.mjs</code> (new) re-encoded every photo to WebP (quality 78, max 1920×2400, never upscaled) and rewrote all references in <code>app/</code>, <code>components/</code> and <code>content/</code>. It's safe to run again after adding new photos.</li>
+    <li>The originals are kept, not deleted, in <code>image-originals/</code> (git- and Vercel-ignored), including the two unused files <code>hero-tablet.jpg</code> and <code>photo_2026-09-21_22-02-36.jpg</code>.</li>
+    <li><code>content/image-sizes.json</code> was regenerated with the new file names and dimensions.</li>
+    <li><code>public/images/og.jpg</code> (new) is a 1200×630 JPEG share image, so link previews keep working on platforms that reject WebP. <code>app/layout.tsx</code> now points to it.</li>
+    <li><code>next.config.ts</code>: WebP-only output, 5 device widths and 3 image widths, a single quality (75) and a 31-day cache TTL. This keeps Vercel's image-optimisation cache and usage small.</li>
+    <li><code>.vercelignore</code> (new) excludes <code>.next</code>, <code>node_modules</code>, <code>*.tsbuildinfo</code>, <code>content/raw</code>, <code>image-originals</code> and <code>audit</code> from CLI uploads. <code>.gitignore</code> now also ignores <code>image-originals</code>.</li>
+    <li>Removed the unused <code>playwright</code> dev dependency (about 19 MB less to install on every Vercel build).</li>
+  </ul>
+  <p class="note">When you replace images per H1 and H4, drop the new originals into <code>public/images/</code>, run <code>node scripts/optimize-images.mjs &amp;&amp; node scripts/image-sizes.mjs</code>, and they will be sized and converted the same way.</p>
+
+  <h2 id="order">Suggested fix order</h2>
+  <ol>
+    <li><strong>Quick code fixes (≈1 hour):</strong> C1 clipped “g”, C2 header contrast, C4 map embed, H6 WhatsApp overlap, H7 section order, H9 price-card background, M2 copy, M7 footer duplicates, L1.</li>
+    <li><strong>Layout (½–1 day):</strong> C3 schedule-first page, H5 rail without pin, H8 mobile compaction, M4 rhythm, M10 mobile heroes, M6 legend and filter.</li>
+    <li><strong>Content and photography:</strong> C5 portrait hero, C6 Canggu in HTML, H1–H4 image replacement and de-duplication, M9 event imagery.</li>
+    <li><strong>Polish:</strong> M1 type and contrast, M3 alignment, M5 watermark, L2–L8.</li>
+  </ol>
+
+  <footer class="end">Audit generated 20 October 2026. Screenshots taken from the local dev build. Measurements come from in-browser scripts covering section heights, natural and rendered image sizes, computed contrast, font sizes and tap-target sizes.</footer>
+</main>
+
+<script>
+(function () {
+  var btns = document.querySelectorAll(".filters button");
+  var items = document.querySelectorAll("article.f");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = b.getAttribute("data-f");
+      btns.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      items.forEach(function (a) { a.classList.toggle("hidden", f !== "all" && a.getAttribute("data-sev") !== f); });
+    });
+  });
+  var root = document.documentElement, t = document.getElementById("theme");
+  try { var s = localStorage.getItem("audit-theme"); if (s) root.setAttribute("data-theme", s); } catch (e) {}
+  t.addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("audit-theme", next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

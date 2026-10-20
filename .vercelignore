@@ -1,0 +1,8 @@
+# Keep the Vercel upload to what the build needs.
+.next
+node_modules
+*.tsbuildinfo
+content/raw
+image-originals
+audit
+README.md
